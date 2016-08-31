@@ -1,0 +1,40 @@
+{
+  "name": "cordova-plugin-qrcodescanner",
+  "version": "1.0.0",
+  "description": "",
+  "cordova": {
+    "id": "cordova-plugin-qrcodescanner",
+    "platforms": [
+      "ios"
+    ]
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://gitlab.com/mankido/cordova-plugin-qrcodescanner.git"
+  },
+  "keywords": [
+    "ecosystem:cordova",
+    "cordova-ios",
+    "cordova:plugin"
+  ],
+  "engines": [
+    {
+      "name": "cordova",
+      "version": ">=3.0.0"
+    },
+    {
+      "name": "cordova-ios",
+      "version": ">=4"
+    },
+    {
+      "name": "cordova-plugin",
+      "version": ">=4.2.0"
+    }
+  ],
+  "author": "Jan Scheurenbrand",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://gitlab.com/mankido/cordova-plugin-qrcodescanner/issues"
+  },
+  "homepage": "https://gitlab.com/mankido/cordova-plugin-qrcodescanner"
+}
