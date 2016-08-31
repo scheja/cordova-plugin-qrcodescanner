@@ -3,8 +3,8 @@
         xmlns:android="http://schemas.android.com/apk/res/android">
     <name>MankidoQRReader</name>
     <js-module name="QRCodeScanner" src="www/qrcodescanner.js">
-        <clobbers target="plugin.notification.qrcodescanner"/>
-        <clobbers target="cordova.plugins.notification.qrcodescanner"/>
+        <clobbers target="plugin.qrcodescanner"/>
+        <clobbers target="cordova.plugins.qrcodescanner"/>
     </js-module>
     <platform name="ios">
         <config-file target="config.xml" parent="/*">
