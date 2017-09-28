@@ -18,10 +18,10 @@ import AVFoundation
 
     func startScan(cmd: CDVInvokedUrlCommand) {
         self.command = cmd
-        self.x = self.command?.argumentAtIndex(0,withDefault: 0) as? Int
-        self.y = self.command?.argumentAtIndex(1,withDefault: 0) as? Int
-        self.width = self.command?.argumentAtIndex(2,withDefault: 100) as? Int
-        self.height = self.command?.argumentAtIndex(3,withDefault: 100) as? Int
+        self.x = self.command?.argument(at: 0,withDefault: 0) as? Int
+        self.y = self.command?.argument(at: 1,withDefault: 0) as? Int
+        self.width = self.command?.argument(at: 2,withDefault: 100) as? Int
+        self.height = self.command?.argument(at: 3,withDefault: 100) as? Int
 
         pluginResult = CDVPluginResult(
             status: CDVCommandStatus_ERROR
@@ -33,8 +33,8 @@ import AVFoundation
             scanActive = true
         }
 
-        self.commandDelegate.runInBackground {
-            self.captureDevice = AVCaptureDevice.devices().filter({ $0.position == .Front }).first as? AVCaptureDevice
+        self.commandDelegate.run( inBackground: {
+            self.captureDevice = AVCaptureDevice.devices().filter({ ($0 as AnyObject).position == .front }).first as? AVCaptureDevice
 
             do {
                 // Get an instance of the AVCaptureDeviceInput class using the previous device object.
@@ -51,38 +51,38 @@ import AVFoundation
                 self.captureSession?.addOutput(captureMetadataOutput)
 
                 // Set delegate and use the default dispatch queue to execute the call back
-                captureMetadataOutput.setMetadataObjectsDelegate(self, queue: dispatch_get_main_queue())
+                captureMetadataOutput.setMetadataObjectsDelegate(self, queue: DispatchQueue.main)
 
                 // Detect all the supported bar code
                 captureMetadataOutput.metadataObjectTypes = [AVMetadataObjectTypeQRCode]
 
-                dispatch_async(dispatch_get_main_queue()) {
-                    let viewRect = CGRectMake(CGFloat(self.x!), CGFloat(self.y!), CGFloat(self.width!), CGFloat(self.height!))
+                DispatchQueue.main.async(execute: {
+                    let viewRect = CGRect(origin: CGPoint(x: self.x!, y: self.y!), size: CGSize(width: self.width!, height: self.height!))
                     self.myView = UIView(frame: viewRect)
                     self.myView?.alpha = 0
                     self.webView.superview?.addSubview(self.myView!);
-                    self.webView.superview?.bringSubviewToFront(self.myView!)
+                    self.webView.superview?.bringSubview(toFront: self.myView!)
                     self.webView.superview?.setNeedsDisplay()
 
                     // Initialize the video preview layer and add it as a sublayer to the viewPreview view's layer.
                     self.videoPreviewLayer = AVCaptureVideoPreviewLayer(session: self.captureSession)
                     self.videoPreviewLayer?.videoGravity = AVLayerVideoGravityResizeAspectFill
                     self.videoPreviewLayer?.frame = self.myView!.bounds
-                    let orientation: UIDeviceOrientation = UIDevice.currentDevice().orientation
+                    let orientation: UIDeviceOrientation = UIDevice.current.orientation
                     print(orientation)
 
                     switch (orientation) {
-                    case .Portrait:
-                        self.videoPreviewLayer?.connection.videoOrientation = AVCaptureVideoOrientation.Portrait
+                    case .portrait:
+                        self.videoPreviewLayer?.connection.videoOrientation = AVCaptureVideoOrientation.portrait
                         break
-                    case .LandscapeRight:
-                        self.videoPreviewLayer?.connection.videoOrientation = AVCaptureVideoOrientation.LandscapeLeft
+                    case .landscapeRight:
+                        self.videoPreviewLayer?.connection.videoOrientation = AVCaptureVideoOrientation.landscapeLeft
                         break
-                    case .LandscapeLeft:
-                        self.videoPreviewLayer?.connection.videoOrientation = AVCaptureVideoOrientation.LandscapeRight
+                    case .landscapeLeft:
+                        self.videoPreviewLayer?.connection.videoOrientation = AVCaptureVideoOrientation.landscapeRight
                         break
                     default:
-                        self.videoPreviewLayer?.connection.videoOrientation = AVCaptureVideoOrientation.Portrait
+                        self.videoPreviewLayer?.connection.videoOrientation = AVCaptureVideoOrientation.portrait
                         break
                     }
 
@@ -95,31 +95,30 @@ import AVFoundation
                     self.qrCodeFrameView = UIView()
 
                     if let qrCodeFrameView = self.qrCodeFrameView {
-                        qrCodeFrameView.layer.borderColor = UIColor.greenColor().CGColor
+                        qrCodeFrameView.layer.borderColor = UIColor.green.cgColor
                         qrCodeFrameView.layer.borderWidth = 2
                         self.webView.superview!.addSubview(qrCodeFrameView)
-                        self.webView.superview!.bringSubviewToFront(qrCodeFrameView)
+                        self.webView.superview!.bringSubview(toFront: qrCodeFrameView)
                     }
 
-                    UIView.animateWithDuration(0.3, delay: 0.4, options: UIViewAnimationOptions.CurveEaseOut, animations: {
+                    UIView.animate(withDuration: 0.3, delay: 0.4, options: UIViewAnimationOptions.curveEaseOut, animations: {
                         self.myView?.alpha = 1
                         }, completion: nil)
 
-                }
+                })
             } catch {
                 // If any error occurs, simply print it out and don't continue any more.
                 print(error)
                 return
             }
-        }
-
+        })
     }
 
-    func captureOutput(captureOutput: AVCaptureOutput!, didOutputMetadataObjects metadataObjects: [AnyObject]!, fromConnection connection: AVCaptureConnection!) {
+    private func captureOutput(captureOutput: AVCaptureOutput!, didOutputMetadataObjects metadataObjects: [AnyObject]!, fromConnection connection: AVCaptureConnection!) {
 
         // Check if the metadataObjects array is not nil and it contains at least one object.
         if metadataObjects == nil || metadataObjects.count == 0 {
-            self.qrCodeFrameView?.frame = CGRectZero
+            self.qrCodeFrameView?.frame = CGRect.zero
             return
         }
 
@@ -132,11 +131,11 @@ import AVFoundation
         if [AVMetadataObjectTypeQRCode].contains(metadataObj.type) {
             //        if metadataObj.type == AVMetadataObjectTypeQRCode {
             // If the found metadata is equal to the QR code metadata then update the status label's text and set the bounds
-            let barCodeObject = self.videoPreviewLayer?.transformedMetadataObjectForMetadataObject(metadataObj)
+            let barCodeObject = self.videoPreviewLayer?.transformedMetadataObject(for: metadataObj)
             self.qrCodeFrameView?.frame = barCodeObject!.bounds
 
             if metadataObj.stringValue != nil {
-                self.didReceiveQRCode(metadataObj.stringValue)
+                self.didReceiveQRCode(code: metadataObj.stringValue)
             }
         }
     }
@@ -156,17 +155,17 @@ import AVFoundation
 
         self.pluginResult = CDVPluginResult(
             status: CDVCommandStatus_OK,
-            messageAsString: code
+            messageAs: code
         )
 
-        self.commandDelegate!.sendPluginResult(
+        self.commandDelegate!.send(
             self.pluginResult,
             callbackId: self.command!.callbackId
         )
     }
 
     func stopScan(cmd: CDVInvokedUrlCommand) {
-      self.didReceiveQRCode("abort")
+        self.didReceiveQRCode(code: "abort")
     }
 
 }
