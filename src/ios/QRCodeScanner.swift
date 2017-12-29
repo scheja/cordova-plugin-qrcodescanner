@@ -162,7 +162,7 @@ import AVFoundation
         
         self.commandDelegate!.send(
             self.pluginResult,
-            callbackId: self.command!.callbackId
+            callbackId: self.command?.callbackId
         )
     }
     
