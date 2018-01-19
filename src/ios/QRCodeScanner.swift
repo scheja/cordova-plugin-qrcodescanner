@@ -15,6 +15,7 @@ import AVFoundation
     var command:CDVInvokedUrlCommand?
     var myView:UIView?
     var x,y,height,width:Int?
+    var rotatePreview = false
     
     func startScan(_ cmd: CDVInvokedUrlCommand) {
         self.command = cmd
@@ -71,19 +72,23 @@ import AVFoundation
                     let orientation: UIDeviceOrientation = UIDevice.current.orientation
                     print(orientation)
                     
-                    switch (orientation) {
-                    case .portrait:
-                        self.videoPreviewLayer?.connection.videoOrientation = AVCaptureVideoOrientation.portrait
-                        break
-                    case .landscapeRight:
+                    if(self.rotatePreview) {
+                        switch (orientation) {
+                        case .portrait:
+                            self.videoPreviewLayer?.connection.videoOrientation = AVCaptureVideoOrientation.portrait
+                            break
+                        case .landscapeRight:
+                            self.videoPreviewLayer?.connection.videoOrientation = AVCaptureVideoOrientation.landscapeLeft
+                            break
+                        case .landscapeLeft:
+                            self.videoPreviewLayer?.connection.videoOrientation = AVCaptureVideoOrientation.landscapeRight
+                            break
+                        default:
+                            self.videoPreviewLayer?.connection.videoOrientation = AVCaptureVideoOrientation.portrait
+                            break
+                        }
+                    } else {
                         self.videoPreviewLayer?.connection.videoOrientation = AVCaptureVideoOrientation.landscapeLeft
-                        break
-                    case .landscapeLeft:
-                        self.videoPreviewLayer?.connection.videoOrientation = AVCaptureVideoOrientation.landscapeRight
-                        break
-                    default:
-                        self.videoPreviewLayer?.connection.videoOrientation = AVCaptureVideoOrientation.portrait
-                        break
                     }
                     
                     self.myView!.layer.addSublayer(self.videoPreviewLayer!)
